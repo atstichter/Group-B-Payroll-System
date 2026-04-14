@@ -1,10 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Manager Homepage</title>
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
+
+<h2>Manager Dashboard</h2>
+
+<form method="GET">
+    <select name="user_id" onchange="this.form.submit()">
+        <option>Select Employee</option>
+        {% for u in users %}
+        <option value="{{ u[0] }}">{{ u[1] }}</option>
+        {% endfor %}
+    </select>
+</form>
+
+<table>
+<tr><th>Date</th><th>Hours</th><th>Type</th><th>Update</th></tr>
+{% for r in records %}
+<tr>
+<form method="POST">
+    <td>{{ r[1] }}</td>
+    <td><input name="hours" value="{{ r[2] }}"></td>
+    <td><input name="type" value="{{ r[3] }}"></td>
+    <td>
+        <input type="hidden" name="record_id" value="{{ r[0] }}">
+        <button type="submit">Save</button>
+    </td>
+</form>
+</tr>
+{% endfor %}
+</table>
 
 </body>
 </html>

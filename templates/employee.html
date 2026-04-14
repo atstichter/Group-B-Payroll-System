@@ -1,10 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Employee Homepage</title>
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
+
+<h2>Employee Dashboard</h2>
+
+<form method="POST">
+    <input type="date" name="date" required>
+    <input type="number" step="0.1" name="hours" placeholder="Hours">
+
+    <select name="type">
+        <option value="work">Work</option>
+        <option value="PTO">PTO</option>
+        <option value="UTO">UTO</option>
+        <option value="Disability">Disability</option>
+        <option value="Maternity">Maternity</option>
+        <option value="Paternity">Paternity</option>
+    </select>
+
+    <button type="submit">Submit</button>
+</form>
+
+<h3>Weekly Summary</h3>
+<p>Total Pay: ${{ pay }}</p>
+
+<table>
+<tr><th>Date</th><th>Hours</th><th>Type</th></tr>
+{% for r in records %}
+<tr>
+    <td>{{ r[0] }}</td>
+    <td>{{ r[1] }}</td>
+    <td>{{ r[2] }}</td>
+</tr>
+{% endfor %}
+</table>
 
 </body>
 </html>
