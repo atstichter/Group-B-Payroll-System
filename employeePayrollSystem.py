@@ -69,7 +69,7 @@ def employee():
     today = datetime.now()
     start = today - timedelta(days=today.weekday() + 1 if today.weekday() != 6 else 0)
 
-    # Fetch all records for the user (still needed for calculation)
+    # Fetch all records for the user
     all_rec = query_db('SELECT id, date, hours, type FROM hours WHERE user_id=?', (uid,))
 
     # Calculate summary stats
@@ -82,12 +82,15 @@ def employee():
             cal[idx] += r[2];
             total += r[2]
 
-    ot = max(0, total - 40)
+    # round hours off at 2 decimal places
+    cal = {k: round(v, 2) for k, v in cal.items()}
+    total = round(total, 2)
+
+    ot = max(0, total - 40);
     pay = (total - ot) * 25 + ot * 37.5
 
-    # Removed weekly_records from render arguments
     return render_template('employee.html', active=active, clock_in=active[2] if active else None, calendar=cal,
-                           total=round(total, 2), pay=round(pay, 2))
+                           total=total, pay=round(pay, 2))
 
 
 # Manager homepage
@@ -106,13 +109,17 @@ def manager():
     cal = {i: 0 for i in range(7)}
 
     if sid:
-        rec = query_db('SELECT id,date,hours,type FROM hours WHERE user_id=?', (sid,))
+        raw_rec = query_db('SELECT id,date,hours,type FROM hours WHERE user_id=?', (sid,))
+        rec = [(r[0], r[1], round(r[2], 2), r[3]) for r in raw_rec]
         today = datetime.now();
         start = today - timedelta(days=today.weekday() + 1 if today.weekday() != 6 else 0)
         for r in rec:
             d = datetime.fromisoformat(r[1])
             if d >= start:
                 cal[(d.weekday() + 1) % 7] += r[2]
+
+        # FIX: Round calendar values to 2 decimal places
+        cal = {k: round(v, 2) for k, v in cal.items()}
 
     if request.method == 'POST':
         if 'delete' in request.form:
