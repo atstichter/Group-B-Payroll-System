@@ -1,42 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Employee Homepage</title>
-    <link rel="stylesheet" href="/static/styles.css">
+<link rel="stylesheet" href="/static/styles.css">
+<script>
+function timer(t){setInterval(()=>{let d=new Date()-new Date(t);let s=Math.floor(d/1000);document.getElementById('t').innerText=Math.floor(s/3600)+'h '+Math.floor((s%3600)/60)+'m '+s%60+'s';},1000);}
+</script>
 </head>
-<body>
+<body {% if clock_in %}onload="timer('{{clock_in}}')"{% endif %}>
 
 <h2>Employee Dashboard</h2>
 
-<form method="POST">
-    <input type="date" name="date" required>
-    <input type="number" step="0.1" name="hours" placeholder="Hours">
+<div class="grid">
 
-    <select name="type">
-        <option value="work">Work</option>
-        <option value="PTO">PTO</option>
-        <option value="UTO">UTO</option>
-        <option value="Disability">Disability</option>
-        <option value="Maternity">Maternity</option>
-        <option value="Paternity">Paternity</option>
-    </select>
+<div class="top">
+{% if active %}
+<p id="t"></p>
+<form method="POST"><button class="big red" name="clock_out">Clock Out</button></form>
+{% else %}
+<form method="POST"><button class="big green" name="clock_in">Clock In</button></form>
+{% endif %}
+</div>
 
-    <button type="submit">Submit</button>
-</form>
-
+<div class="left">
 <h3>Weekly Summary</h3>
-<p>Total Pay: ${{ pay }}</p>
+<p>Hours: {{total}}</p>
+<p>Pay: ${{pay}}</p>
+</div>
 
-<table>
-<tr><th>Date</th><th>Hours</th><th>Type</th></tr>
-{% for r in records %}
-<tr>
-    <td>{{ r[0] }}</td>
-    <td>{{ r[1] }}</td>
-    <td>{{ r[2] }}</td>
-</tr>
-{% endfor %}
+<div class="right">
+<h3>Calendar</h3>
+<table class="calendar">
+<tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>
+<tr>{% for i in range(7) %}<td>{{calendar[i]}}</td>{% endfor %}</tr>
 </table>
+</div>
+
+</div>
+
+<!-- New Section: Detailed Weekly Records -->
+<div class="card">
+    <h3>This Week's Log</h3>
+    <table>
+        <tr><th>Date</th><th>Type</th><th>Hours</th></tr>
+        {% for r in weekly_records %}
+        <tr>
+            <td>{{r[1]}}</td>
+            <td>{{r[3]}}</td>
+            <td>{{r[2]}}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3">No entries this week.</td></tr>
+        {% endfor %}
+    </table>
+</div>
 
 </body>
 </html>

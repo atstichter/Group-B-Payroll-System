@@ -1,38 +1,78 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Manager Homepage</title>
-    <link rel="stylesheet" href="/static/styles.css">
+<link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
 
 <h2>Manager Dashboard</h2>
 
+<!-- Active Status Indicator -->
+{% if selected_id and active_punch %}
+<div style="background: #4CAF50; color: white; padding: 10px; text-align: center; border-radius: 5px; margin-bottom: 10px;">
+    Employee is currently CLOCKED IN since {{ active_punch[2][:16] }}
+</div>
+{% elif selected_id %}
+<div style="background: #333; color: #ccc; padding: 10px; text-align: center; border-radius: 5px; margin-bottom: 10px;">
+    Employee is currently OFF DUTY
+</div>
+{% endif %}
+
 <form method="GET">
-    <select name="user_id" onchange="this.form.submit()">
-        <option>Select Employee</option>
-        {% for u in users %}
-        <option value="{{ u[0] }}">{{ u[1] }}</option>
-        {% endfor %}
-    </select>
+<select name="user_id" onchange="this.form.submit()">
+<option>Select Employee</option>
+{% for u in users %}<option value="{{u[0]}}" {% if selected_id==u[0] %}selected{% endif %}>{{u[1]}}</option>{% endfor %}
+</select>
 </form>
 
-<table>
-<tr><th>Date</th><th>Hours</th><th>Type</th><th>Update</th></tr>
-{% for r in records %}
-<tr>
+<div class="grid">
+
+<div class="left">
+<h3>Add Entry</h3>
 <form method="POST">
-    <td>{{ r[1] }}</td>
-    <td><input name="hours" value="{{ r[2] }}"></td>
-    <td><input name="type" value="{{ r[3] }}"></td>
-    <td>
-        <input type="hidden" name="record_id" value="{{ r[0] }}">
-        <button type="submit">Save</button>
-    </td>
+    <input type="date" name="date" required>
+    <input type="number" step="0.1" name="hours" placeholder="Hours Worked" required>
+    <select name="type" required>
+        <option value="work">Regular</option>
+        <option value="overtime">Overtime</option>
+        <option value="PTO">PTO</option>
+        <option value="UTO">UTO</option>
+    </select>
+    <button name="add" value="1">Add Entry</button>
 </form>
-</tr>
+
+<h3>Entries</h3>
+<table>
+{% for r in records %}
+<tr><form method="POST">
+<td>{{r[1]}}</td>
+<td><input name="hours" value="{{r[2]}}"></td>
+<td>
+    <select name="type">
+    <option value="work" {% if r[3]=='work' %}selected{% endif %}>Regular</option>
+    <option value="overtime" {% if r[3]=='overtime' %}selected{% endif %}>Overtime</option>
+    <option value="PTO" {% if r[3]=='PTO' %}selected{% endif %}>PTO</option>
+    <option value="UTO" {% if r[3]=='UTO' %}selected{% endif %}>UTO</option>
+</select>
+</td>
+<td>
+<input type="hidden" name="record_id" value="{{r[0]}}">
+<button>Save</button><button name="delete">X</button>
+</td>
+</form></tr>
 {% endfor %}
 </table>
+</div>
+
+<div class="right">
+<h3>Calendar</h3>
+<table class="calendar">
+<tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>
+<tr>{% for i in range(7) %}<td>{{calendar[i]}}</td>{% endfor %}</tr>
+</table>
+</div>
+
+</div>
 
 </body>
 </html>
