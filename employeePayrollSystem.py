@@ -12,7 +12,6 @@ HOURLY_RATE = 25
 def init_db():
     conn = sqlite3.connect(DB)
     c = conn.cursor()
-    # FIX: Added UNIQUE constraint to email to prevent duplicates
     c.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, email TEXT UNIQUE, password TEXT, role TEXT)')
     c.execute(
         'CREATE TABLE IF NOT EXISTS hours (id INTEGER PRIMARY KEY, user_id INTEGER, date TEXT, hours REAL, type TEXT)')
@@ -36,7 +35,6 @@ def query_db(q, a=(), one=False):
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Now guaranteed to return only one user per email
         u = query_db('SELECT * FROM users WHERE email=? AND password=?',
                      (request.form['email'], request.form['password']), True)
         if u:
@@ -44,7 +42,6 @@ def login():
             session['role'] = u[3]
             return redirect(url_for(u[3]))
         else:
-            # Optional: Add a flash message for invalid login
             return render_template('login.html', error="Invalid credentials")
     return render_template('login.html')
 
@@ -72,11 +69,10 @@ def employee():
     today = datetime.now()
     start = today - timedelta(days=today.weekday() + 1 if today.weekday() != 6 else 0)
 
-    # Fetch all records for the user
+    # Fetch all records for the user (still needed for calculation)
     all_rec = query_db('SELECT id, date, hours, type FROM hours WHERE user_id=?', (uid,))
 
-    # Filter for current week for summary
-    weekly_records = []
+    # Calculate summary stats
     cal = {i: 0 for i in range(7)};
     total = 0
     for r in all_rec:
@@ -85,13 +81,13 @@ def employee():
             idx = (d.weekday() + 1) % 7
             cal[idx] += r[2];
             total += r[2]
-            weekly_records.append(r)
 
-    ot = max(0, total - 40);
+    ot = max(0, total - 40)
     pay = (total - ot) * 25 + ot * 37.5
 
+    # Removed weekly_records from render arguments
     return render_template('employee.html', active=active, clock_in=active[2] if active else None, calendar=cal,
-                           total=round(total, 2), pay=round(pay, 2), weekly_records=weekly_records)
+                           total=round(total, 2), pay=round(pay, 2))
 
 
 # Manager homepage
@@ -136,8 +132,6 @@ def manager():
 if __name__ == '__main__':
     init_db()
 
-    # FIX: Use INSERT OR IGNORE to prevent duplicate users on restart
-    # This ensures we only have ONE employee and ONE manager
     try:
         query_db("INSERT OR IGNORE INTO users (email, password, role) VALUES (?, ?, ?)",
                  ('employee@test.com', '1234', 'employee'))

@@ -37,22 +37,5 @@ function timer(t){setInterval(()=>{let d=new Date()-new Date(t);let s=Math.floor
 
 </div>
 
-<!-- New Section: Detailed Weekly Records -->
-<div class="card">
-    <h3>This Week's Log</h3>
-    <table>
-        <tr><th>Date</th><th>Type</th><th>Hours</th></tr>
-        {% for r in weekly_records %}
-        <tr>
-            <td>{{r[1]}}</td>
-            <td>{{r[3]}}</td>
-            <td>{{r[2]}}</td>
-        </tr>
-        {% else %}
-        <tr><td colspan="3">No entries this week.</td></tr>
-        {% endfor %}
-    </table>
-</div>
-
 </body>
 </html>
